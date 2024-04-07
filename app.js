@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const axios = require("axios");
 const https = require("https");
+const socksProxy = require("socks-proxy-agent")
 const { randomUUID } = require("crypto");
 
 // Constants for the server and API configuration
@@ -10,7 +11,8 @@ const baseUrl = "https://chat.openai.com";
 const apiUrl = `${baseUrl}/backend-api/conversation`;
 const refreshInterval = 60000; // Interval to refresh token in ms
 const errorWait = 120000; // Wait time in ms after an error
-
+let socks5Proxy = process.env["SOCKS5_PROXY"];
+// console.log("socks5Proxy=", socks5Proxy)
 // Initialize global variables to store the session token and device ID
 let token;
 let oaiDeviceId;
@@ -58,9 +60,11 @@ async function* StreamCompletion(data) {
   yield* linesToMessages(chunksToLines(data));
 }
 
+//const httpsAgent = new https.Agent({ rejectUnauthorized: false })
+const httpsAgent = socks5Proxy ? new socksProxy.SocksProxyAgent(socks5Proxy) : new https.Agent({ rejectUnauthorized: false });
 // Setup axios instance for API requests with predefined configurations
 const axiosInstance = axios.create({
-  httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+  httpsAgent: httpsAgent,
   headers: {
     accept: "*/*",
     "accept-language": "en-US,en;q=0.9",
