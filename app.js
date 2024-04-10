@@ -6,7 +6,7 @@ const socksProxy = require("socks-proxy-agent")
 const { randomUUID } = require("crypto");
 
 // Constants for the server and API configuration
-const port = 3040;
+const port = parseInt(process.env["PORT"] || 3040);
 const baseUrl = "https://chat.openai.com";
 const apiUrl = `${baseUrl}/backend-api/conversation`;
 const refreshInterval = 60000; // Interval to refresh token in ms
